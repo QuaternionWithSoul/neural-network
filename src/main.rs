@@ -11,20 +11,35 @@ struct Data {
     output: u8
 }
 
-fn main() -> Result<()> {
-    let path: &str = "data/mydataset";
-    let name: &str = "learn-0";
-
-    println!("Extracting data from a dataset...");
-    let dataset: Vec<Data> = deserialize::<Vec<Data>>(path, name)?;
+fn load_dataset<T: for<'de> Deserialize<'de>>(path: &str, name: &str) -> Result<Vec<T>> {
+    println!("Extracting data from a dataset from {path}/{name}...");
+    let dataset: Vec<T> = deserialize::<Vec<T>>(path, name)?;
     println!("Done! Amount of educational material {}", dataset.len());
     println!("");
+    
+    Ok(dataset)
+}
 
-    for index in 0..dataset.len() {
-        println!("Input: {:?}", dataset[index].input);
-        println!("Output: {}", dataset[index].output);
+fn main() -> Result<()> {
+    let path: &str = "data/mydataset";
+
+    let learn: Vec<Data> = load_dataset::<Data>(path, "learn-0")?;
+    let test: Vec<Data> = load_dataset::<Data>(path, "test-0")?;
+    println!("");
+
+    println!("Contents of the learn dataset:\n");
+    for index in 0..learn.len() {
+        println!("Input: {:?}", learn[index].input);
+        println!("Output: {}", learn[index].output);
         println!("");
-    }
+    } println!("");
+
+    println!("Contents of the test dataset:\n");
+    for index in 0..test.len() {
+        println!("Input: {:?}", test[index].input);
+        println!("Output: {}", test[index].output);
+        println!("");
+    } println!("");
 
     Ok(())
 }
