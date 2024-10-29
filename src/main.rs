@@ -1,28 +1,29 @@
 mod data;
 
-use data::deserialize;
+use data::{serialize, deserialize};
 
 use std::io::Result;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct Data {
-    inputs: Vec<u8>,
-    outputs: u8
+    input: Vec<u8>,
+    output: u8
 }
 
 fn main() -> Result<()> {
-    let path: &str = "data/mnist";
+    let path: &str = "data/mydataset";
     let name: &str = "learn-0";
 
     println!("Extracting data from a dataset...");
-    let data: Vec<Data> = deserialize::<Vec<Data>>(path, name)?;
-    println!("Done!");
+    let dataset: Vec<Data> = deserialize::<Vec<Data>>(path, name)?;
+    println!("Done! Amount of educational material {}", dataset.len());
     println!("");
 
-    for index in 0..1 {
-        println!("Inputs: {:?}", data[index].inputs);
-        println!("Outputs: {}", data[index].outputs);
+    for index in 0..dataset.len() {
+        println!("Input: {:?}", dataset[index].input);
+        println!("Output: {}", dataset[index].output);
+        println!("");
     }
 
     Ok(())

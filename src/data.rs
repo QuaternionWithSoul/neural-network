@@ -8,6 +8,7 @@ use bincode;
 
 use flate2::{write::GzEncoder, read::GzDecoder, Compression};
 
+#[allow(dead_code)]
 pub fn serialize<T: Serialize>(data: &T, path: &str, name: &str) -> Result<()> {
     let dir_path = Path::new(path);
     if !dir_path.exists() { create_dir_all(dir_path)?; }
