@@ -1,11 +1,11 @@
 mod data;
 
-use data::deserialize;
+use data::{serialize,deserialize};
 
 use std::io::Result;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct Data {
     input: Vec<u8>,
     output: u8
@@ -21,25 +21,17 @@ fn load_dataset<T: for<'de> Deserialize<'de>>(path: &str, name: &str) -> Result<
 }
 
 fn main() -> Result<()> {
-    let path: &str = "data/mydataset";
+    let path: &str = "data/mnist";
+    let learn_dataset_name: &str = "learn-0";
+    let test_dataset_name: &str = "test-0";
 
-    let learn: Vec<Data> = load_dataset::<Data>(path, "learn-0")?;
-    let test: Vec<Data> = load_dataset::<Data>(path, "test-0")?;
+    let learn: Vec<Data> = load_dataset::<Data>(path, learn_dataset_name)?;
+    let test: Vec<Data> = load_dataset::<Data>(path, test_dataset_name)?;
     println!("");
 
-    println!("Contents of the learn dataset:\n");
-    for index in 0..learn.len() {
-        println!("Input: {:?}", learn[index].input);
-        println!("Output: {}", learn[index].output);
-        println!("");
-    } println!("");
-
-    println!("Contents of the test dataset:\n");
-    for index in 0..test.len() {
-        println!("Input: {:?}", test[index].input);
-        println!("Output: {}", test[index].output);
-        println!("");
-    } println!("");
+    // code
+    println!("Input: {:?}", learn[0].input);
+    println!("Output: {}", learn[0].output);
 
     Ok(())
 }
