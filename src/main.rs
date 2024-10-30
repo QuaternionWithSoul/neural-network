@@ -21,7 +21,7 @@ fn load_dataset<T: for<'de> Deserialize<'de>>(path: &str, name: &str) -> Result<
 }
 
 fn main() -> Result<()> {
-    let path: &str = "data/mnist";
+    let path: &str = "data/mydataset";
     let learn_dataset_name: &str = "learn-0";
     let test_dataset_name: &str = "test-0";
 
