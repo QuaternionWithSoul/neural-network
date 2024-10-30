@@ -1,11 +1,11 @@
 mod data;
 
-use data::{serialize,deserialize};
+use data::deserialize;
 
 use std::io::Result;
-use serde::{Serialize, Deserialize};
+use serde::Deserialize;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Deserialize)]
 struct Data {
     input: Vec<u8>,
     output: u8
