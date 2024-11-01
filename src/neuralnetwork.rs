@@ -1,87 +1,56 @@
-use std::io::{Result, Error, ErrorKind};
-use rand::Rng;
+use std::io::Result;
+use rand::{Rng, rngs::ThreadRng};
 
 
-pub struct WeightLayer {
-    input: usize,
-    output: usize,
-    bias: bool,
-    learning_rate: f32,
-
-    activation: fn(f32, usize) -> f32,
-    back_activation: fn(f32, usize) -> f32,
-
-
-    pub weights: Vec<f32>,
+#[derive(Clone)]
+pub struct DenseLayer {
+    pub weights: Vec<Vec<f32>>,
+    pub bias_weights: Vec<f32>,
+    pub input_size: usize,
+    pub output_size: usize,
+    activation: fn(f32) -> f32
 }
 
-impl WeightLayer {
-    pub fn new(input: usize, output: usize, bias: bool, learning_rate: f32, activation: fn(f32, usize) -> f32, back_activation: fn(f32, usize) -> f32) -> Result<WeightLayer> {
-        let mut weights: Vec<f32> = Vec::new();
+impl DenseLayer {
+    pub fn new(input_size: usize, output_size: usize, activation: fn(f32) -> f32) -> Result<DenseLayer> {
+        let mut rng: ThreadRng = rand::thread_rng();
 
-        for _ in 0..(input + bias as usize) {
-            for _ in 0..output {
-                weights.push(rand::thread_rng().gen::<f32>());
+        let mut weights: Vec<Vec<f32>> = Vec::new();
+        for _ in 0..input_size {
+            let mut input_weights: Vec<f32> = Vec::new();
+            for _ in 0..output_size {
+                input_weights.push(rng.gen_range(-1.0..1.0));
             }
+            weights.push(input_weights);
+        }
+
+        let mut bias_weights: Vec<f32> = Vec::new();
+        for _ in 0..output_size {
+            bias_weights.push(rng.gen_range(-1.0..1.0));
         }
 
         Ok(
-            WeightLayer { input, output, bias, learning_rate, weights, activation, back_activation }
+            DenseLayer { weights, bias_weights, input_size, output_size, activation }
         )
     }
 
-    pub fn test(&self, input: &Vec<f32>) -> Result<Vec<f32>> {
-        if input.len() != self.input {
-            return Err(Error::new(ErrorKind::InvalidInput, "Invalid input size"));
+    pub fn prediction(&self, inputs: Vec<f32>) -> Result<Vec<f32>> {
+        let mut outputs: Vec<f32> = Vec::new();
+
+        for y in 0..self.output_size {
+            let mut neuron_before_activation: f32 = 0.0;
+            for x in 0..self.input_size {
+                neuron_before_activation += inputs[x] * self.weights[x][y];
+            }
+            neuron_before_activation += self.bias_weights[y];
+
+            outputs.push((self.activation)(neuron_before_activation));
         }
 
-        let mut output: Vec<f32> = Vec::new();
-
-        for x in 0..self.output {
-            let mut output_neuron: f32 = 0.0;
-
-            for y in 0..self.input {
-                output_neuron += input[x] * self.weights[x * self.input + y];
-            }
-
-            if self.bias {
-                output_neuron += 1.0 * self.weights[self.input * self.output + x];
-            }
-
-            output.push((self.activation)(output_neuron, self.input));
-        }
-
-        Ok(
-            output
-        )
+        Ok( outputs )
     }
 
-    pub fn learn(&mut self, input: &Vec<f32>, output: &Vec<f32>) -> Result<()> {
-        if input.len() != self.input {
-            return Err(Error::new(ErrorKind::InvalidInput, "Invalid input size"));
-        }
-        if output.len() != self.output {
-            return Err(Error::new(ErrorKind::InvalidInput, "Invalid output size"));
-        }
-
-        let mut result: Vec<f32> = self.test(&input)?;
-
-        for x in 0..self.output {
-            for y in 0..self.input {
-                self.weights[x * self.input + y] += self.learning_rate
-                    * (result[x] - output[x])
-                    * (self.back_activation)(result[x], self.input)
-                    * input[y];
-            }
-
-            if self.bias {
-                self.weights[self.input * self.output + x] += self.learning_rate
-                    * (result[x] - output[x])
-                    * (self.back_activation)(result[x], self.input)
-                    * 1.0;
-            }
-        }
-
-        Ok(())
+    pub fn error_backpropagation(&mut self, inputs: Vec<f32>, outputs: Vec<f32>) -> Result<DenseLayer> {
+        Ok( self.clone() )
     }
 }

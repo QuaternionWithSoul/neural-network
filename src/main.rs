@@ -2,7 +2,7 @@ mod data;
 mod neuralnetwork;
 
 use data::deserialize;
-use neuralnetwork::WeightLayer;
+use neuralnetwork::DenseLayer;
 
 use std::io::Result;
 use serde::Deserialize;
@@ -22,12 +22,8 @@ fn load_dataset<T: for<'de> Deserialize<'de>>(path: &str, name: &str) -> Result<
     Ok(dataset)
 }
 
-fn f(x: f32, i: usize) -> f32 {
-    (x.abs() / i as f32).sin().abs() / 0.84147096
-}
-
-fn back_f(x: f32, i: usize) -> f32 {
-    (x * 0.84147096).asin().abs() * i as f32
+fn relu(x: f32) -> f32 {
+    x .rem_euclid(1.0)
 }
 
 fn main() -> Result<()> {
@@ -40,42 +36,13 @@ fn main() -> Result<()> {
     println!("");
 
     // code
-    let mut wl: WeightLayer = WeightLayer::new(3, 1, true, 0.1, f, back_f)?;
+    let dl: DenseLayer = DenseLayer::new(3, 1, relu)?;
 
-    println!("{:?}", wl.weights);
+    println!("Input: {:?}", vec![1.0, 0.0, 0.0]);
+    println!("Prediction: {:?}", dl.prediction(vec![1.0, 0.0, 0.0])?);
     println!("");
-
-    for _ in 0..10 {
-        for data in &learn {
-            let input: Vec<f32> = data.input.iter().map(|&x| x as f32).collect();
-            let output: Vec<f32> = vec![data.output as f32];
-    
-            wl.learn(&input, &output)?;
-        }
-    }
-
-    for data in &learn {
-        let input: Vec<f32> = data.input.iter().map(|&x| x as f32).collect();
-        let output: Vec<f32> = vec![data.output as f32];
-    
-        println!("Input {:?}", &input);
-        println!("Result {:?}", wl.test(&input)?);
-        println!("Output {:?}", &output);
-        println!("");
-    }
-
-    for data in &test {
-        let input: Vec<f32> = data.input.iter().map(|&x| x as f32).collect();
-        let output: Vec<f32> = vec![data.output as f32];
-    
-        println!("Input {:?}", &input);
-        println!("Result {:?}", wl.test(&input)?);
-        println!("Output {:?}", &output);
-        println!("");
-    }
-
-    println!("{:?}", wl.weights);
-    println!("");
+    println!("Neuron weights: {:?}", dl.weights);
+    println!("Bias neuron weights: {:?}", dl.bias_weights);
 
     Ok(())
 }
